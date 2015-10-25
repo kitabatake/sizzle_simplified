@@ -11,7 +11,18 @@ var
   document = window.document,
   array = [],
   push = array.push,
-  rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
+  rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,
+  // http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
+  identifier = "(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",
+
+  matchExpr = {
+    "ID": new RegExp( "^#(" + identifier + ")" ),
+    "CLASS": new RegExp( "^\\.(" + identifier + ")" ),
+    "TAG": new RegExp( "^(" + identifier + "|[*])" ),
+    //TODO "ATTR": new RegExp( "^" + attributes )
+  },
+
+  rcombinators = new RegExp( "^(\\s+)" );
 
 
 window.Sizzle = Sizzle = function(selector){
@@ -21,8 +32,8 @@ window.Sizzle = Sizzle = function(selector){
   if(match = rquickExpr.exec( selector )){
 
     // Speed-up: Sizzle("#ID")
-    if(match[1]) {
-      if(elem = document.getElementById(match[1])){
+    if (match[1]) {
+      if (elem = document.getElementById(match[1])) {
         results.push(elem);
       }
     }
@@ -41,12 +52,57 @@ window.Sizzle = Sizzle = function(selector){
   return results;
 }
 
+Sizzle.tokenize = function(selector){
+
+  var matched, match, tokens = [], type, soFar = selector;
+
+  while ( soFar ) {
+
+    matched = false;
+
+    //combinator
+    if  (match = rcombinators.exec(soFar) ) {
+
+      matched = match.shift();
+      tokens.push({
+        value: matched,
+        type: match[0]
+      });
+
+      soFar = soFar.slice(matched.length);
+    }
+
+    //Filters
+    for (type in matchExpr) {
+      if ( match = matchExpr[type].exec(soFar) ) {
+        matched = match.shift();
+        tokens.push({
+          value: matched,
+          type: type,
+          matches: match
+        });
+        soFar = soFar.slice( matched.length );
+      }
+    }
+
+    if ( !matched ) {
+       console.log("not match");
+      break;
+    }
+  }
+
+  return tokens;
+}
+
 
 })(window);
 
 
 window.onload = function(){
-  Sizzle(".rabi");
+  //Sizzle(".rabi");
+
+  console.log(Sizzle.tokenize("p a"));
+
 }
 
 
