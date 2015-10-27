@@ -140,6 +140,9 @@ select = Sizzle.select = function(selector) {
     }
   }
 
+  console.log(seed);
+  console.log(tokens);
+
   //superMatcher = compile(selector, tokens);
   //return superMatcher(seed, context);
 
