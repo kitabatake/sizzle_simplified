@@ -5,7 +5,7 @@
  * This code excepted enviroment compatibility and QSA code from original code.
  */
 
-(function(window){
+( function( window ) {
 
 var 
   document = window.document,
@@ -49,7 +49,7 @@ var
   rcombinators = new RegExp( "^(\\s+)" );
 
 
-window.Sizzle = Sizzle = function(selector) {
+window.Sizzle = Sizzle = function( selector ) {
 
   results = [];
 
@@ -72,11 +72,11 @@ window.Sizzle = Sizzle = function(selector) {
     }
   }
 
-  console.log(results);
+  console.log( results );
   return results;
 }
 
-tokenize = Sizzle.tokenize = function(selector) {
+tokenize = Sizzle.tokenize = function( selector ) {
 
   var matched, match, tokens = [], type, soFar = selector;
 
@@ -85,7 +85,7 @@ tokenize = Sizzle.tokenize = function(selector) {
     matched = false;
 
     //combinator
-    if  (match = rcombinators.exec(soFar) ) {
+    if  ( match = rcombinators.exec( soFar ) ) {
 
       matched = match.shift();
       tokens.push({
@@ -93,12 +93,12 @@ tokenize = Sizzle.tokenize = function(selector) {
         type: match[0]
       });
 
-      soFar = soFar.slice(matched.length);
+      soFar = soFar.slice( matched.length );
     }
 
     //Filters
     for (type in matchExpr) {
-      if ( match = matchExpr[type].exec(soFar) ) {
+      if ( match = matchExpr[type].exec( soFar ) ) {
         matched = match.shift();
         tokens.push({
           value: matched,
@@ -118,7 +118,7 @@ tokenize = Sizzle.tokenize = function(selector) {
   return tokens;
 }
 
-select = Sizzle.select = function(selector) {
+select = Sizzle.select = function( selector ) {
 
   var token,
   tokens = tokenize(selector),
@@ -131,35 +131,51 @@ select = Sizzle.select = function(selector) {
     token = tokens[i];
     type = token.type;
 
-    if ( Expr.relative[type]) {
+    if ( Expr.relative[type] ) {
       break;
     }
     if ( find = Expr.find[type] ) {
-      seed = find(token.matches[0], document);
+      seed = find( token.matches[0], document );
       tokens.splice(i, 1);
     }
   }
 
-  console.log(seed);
-  console.log(tokens);
+  console.log( seed );
+  console.log( tokens );
 
-  //superMatcher = compile(selector, tokens);
-  //return superMatcher(seed, context);
+  seedFilter = compile( selector, tokens );
+  return seedFilter( seed );
 
 }
 
-compile = Sizzle.compile = function(selector, tokens) {
+compile = Sizzle.compile = function( selector, tokens ) {
 
-  i = tokens.length,
-  elementMatchers = [];
+  matcher = makeMatcher( tokens );
+  return makeSeedFilter( matcher );
+}
 
-  while (i--) {
-    //TODO elementMatcher.push(matcherFromTokens(tokens[i]))
+makeMatcher = function( tokens ) {
+  return function( elem ) {
+    //TODO
+    return true;
   }
 }
 
-matcherFromTokens = function(token) {
-  
+makeSeedFilter = function( matcher ) {
+
+  return function( seed ) {
+    
+    results = [];
+
+    for ( i = 0; i < seed.length; i++) {
+      elem = seed[i];
+      if ( matcher( elem ) ) {
+        results.push( elem );
+      }
+    }
+    
+    return results
+  }
 }
 
 
