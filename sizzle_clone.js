@@ -22,14 +22,38 @@ var
     //TODO "ATTR": new RegExp( "^" + attributes )
   },
 
+  Expr = {
+    relative: {
+      ">": { dir: "parentNode", first: true },
+      " ": { dir: "parentNode" },
+      "+": { dir: "previousSibling", first: true },
+      "~": { dir: "previousSibling" }
+    },
+    find: {
+      "ID": function( id, context ) {
+        if ( typeof context.getElementById !== "undefined" && documentIsHTML ) {
+          var m = context.getElementById( id );
+          // Check parentNode to catch when Blackberry 4.6 returns
+          // nodes that are no longer in the document #6963
+          return m && m.parentNode ? [ m ] : [];
+        }
+      },
+      "TAG": function( tag, context ) {
+        if ( typeof context.getElementsByTagName !== "undefined" ) {
+          return context.getElementsByTagName( tag );
+        } 
+      }
+    }
+  }
+
   rcombinators = new RegExp( "^(\\s+)" );
 
 
-window.Sizzle = Sizzle = function(selector){
+window.Sizzle = Sizzle = function(selector) {
 
   results = [];
 
-  if(match = rquickExpr.exec( selector )){
+  if (match = rquickExpr.exec( selector )) {
 
     // Speed-up: Sizzle("#ID")
     if (match[1]) {
@@ -52,7 +76,7 @@ window.Sizzle = Sizzle = function(selector){
   return results;
 }
 
-Sizzle.tokenize = function(selector){
+tokenize = Sizzle.tokenize = function(selector) {
 
   var matched, match, tokens = [], type, soFar = selector;
 
@@ -94,16 +118,50 @@ Sizzle.tokenize = function(selector){
   return tokens;
 }
 
+select = Sizzle.select = function(selector) {
+
+  var token,
+  tokens = tokenize(selector),
+  seed = [];
+
+  // Fetch a seed set for right-to-left matching
+  i = tokens.length;
+  while( i-- ){
+
+    token = tokens[i];
+    type = token.type;
+
+    if ( Expr.relative[type]) {
+      break;
+    }
+    if ( find = Expr.find[type] ) {
+      seed = find(token.matches[0], document);
+      tokens.splice(i, 1);
+    }
+  }
+
+  //superMatcher = compile(selector, tokens);
+  //return superMatcher(seed, context);
+
+}
+
+compile = Sizzle.compile = function(selector, tokens) {
+
+  i = tokens.length,
+  elementMatchers = [];
+
+  while (i--) {
+    //TODO elementMatcher.push(matcherFromTokens(tokens[i]))
+  }
+}
+
+matcherFromTokens = function(token) {
+  
+}
+
 
 })(window);
 
-
-window.onload = function(){
-  //Sizzle(".rabi");
-
-  console.log(Sizzle.tokenize("p a"));
-
-}
 
 
 
